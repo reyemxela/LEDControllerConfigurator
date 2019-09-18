@@ -1,20 +1,21 @@
 class Strip {
-    constructor(count, startpos, endpos) {
-      this.leds = [];
-      this.count = count;
-      this.startpos = createVector(startpos[0], startpos[1]);
-      this.endpos = createVector(endpos[0], endpos[1]);
-      for (this.i = 0; this.i < this.count; this.i++) { this.leds[this.i] = color(0, 0, 0); }
-    }
+  constructor(label, count, position) {
+    this.leds = [];
+    this.label = '>- ' + label + ' ->';
+    this.count = count;
+    this.startpos = createVector(position.start[0], position.start[1]);
+    this.endpos = createVector(position.end[0], position.end[1]);
+    for (this.i = 0; this.i < this.count; this.i++) { this.leds[this.i] = color(0, 0, 0); }
+  }
 }
 
 class Layout {
   constructor(data) {
-    this.Right = new Strip(data.rightcount, data.rightpos.start, data.rightpos.end);
-    this.Left = new Strip(data.leftcount, data.leftpos.start, data.leftpos.end);
-    this.Nose = new Strip(data.nosecount, data.nosepos.start, data.nosepos.end);
-    this.Fuse = new Strip(data.fusecount, data.fusepos.start, data.fusepos.end);
-    this.Tail = new Strip(data.tailcount, data.tailpos.start, data.tailpos.end);
+    this.Right = new Strip('Right', data.rightcount, data.rightpos);
+    this.Left = new Strip('Left', data.leftcount, data.leftpos);
+    this.Nose = new Strip('Nose', data.nosecount, data.nosepos);
+    this.Fuse = new Strip('Fuse', data.fusecount, data.fusepos);
+    this.Tail = new Strip('Tail', data.tailcount, data.tailpos);
     this.image = data.image;
   }
 }
@@ -26,22 +27,9 @@ let ledsize = 8;
 
 let curLayout;
 
-function setup() {
-  createCanvas(600, 600);
-  strokeWeight(0.5);
-  stroke(255);
-  angleMode(RADIANS);
-
-  scaleW = width/100;
-  scaleH = height/100;
-
-  curLayout = new Layout(JSON.parse(Radian));
-
-  radianImg = loadImage(curLayout.image);
-}
-
 function drawString(strip) {
-  resetMatrix();
+  push();
+
   for (i = 0; i < strip.count; i++) {
     let diff = p5.Vector.sub(strip.endpos, strip.startpos).div(strip.count-1).mult(i);
     let pos = p5.Vector.add(strip.startpos, diff);
@@ -50,14 +38,18 @@ function drawString(strip) {
     fill(strip.leds[i]);
     ellipse(pos.x, pos.y, ledsize, ledsize);
   }
+
   fill(0);
   let midpos = p5.Vector.sub(strip.endpos, strip.startpos).div(2).add(strip.startpos);
-  let rot = strip.endpos.angleBetween(strip.startpos);
+  let rot = p5.Vector.sub(strip.endpos, strip.startpos).heading();
   midpos.x *= scaleW;
   midpos.y *= scaleH;
   translate(midpos.x, midpos.y);
   rotate(rot);
-  text('testing', 0, 0);
+  textAlign(CENTER);
+  text(strip.label, 0, -5);
+
+  pop();
 }
 
 function rainbow(layout) {
@@ -79,9 +71,27 @@ function rainbow(layout) {
   }
 }
 
+function preload() {
+  Radian = loadJSON('layouts/Radian.json');
+}
+
+function setup() {
+  createCanvas(600, 600);
+  stroke(255);
+
+  scaleW = width/100;
+  scaleH = height/100;
+
+  curLayout = new Layout(Radian);
+
+  img = loadImage(curLayout.image);
+
+  // noLoop();
+}
+
 function draw() {
   background(50);
-  image(radianImg, 0, 0, width, height);
+  image(img, 0, 0, width, height);
   rainbow(curLayout);
   drawString(curLayout.Right);
   drawString(curLayout.Left);
