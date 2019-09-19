@@ -20,7 +20,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(700, 700);
   stroke(255);
 
   scaleW = width/100;
@@ -63,14 +63,12 @@ function setup() {
   tailSlider = createSlider(0, 100, curLayout.Tail.count);
   tailSlider.position(sliderX, sliderY+120);
   
-  img = loadImage(curLayout.image);
-  
   // noLoop();
 }
 
 function draw() {
   background(50);
-  image(img, 0, 0, width, height);
+  image(curLayout.image, 0, 0, width, height);
   
   curLayout.Right.count = rightSlider.value();
   curLayout.Left.count = leftSlider.value();
@@ -129,7 +127,7 @@ class Layout {
     this.Fuse = new Strip('Fuse', data.fuse, data.fusepos);
     this.Tail = new Strip('Tail', data.tail, data.tailpos);
     this.nosefuseJoined = data.nosefuseJoined;
-    this.image = data.image;
+    this.image = loadImage(String(data.image));
   }
 }
 
