@@ -1,0 +1,55 @@
+{
+  "right": {
+    "count": 31,
+    "reversed": false
+  },
+
+  "left": {
+    "count": 31,
+    "reversed": false
+  },
+
+  "nose": {
+    "count": 0,
+    "reversed": false
+  },
+
+  "fuse": {
+    "count": 10,
+    "reversed": false
+  },
+
+  "tail": {
+    "count": 10,
+    "reversed": false
+  },
+
+  "nosefuseJoined": false,
+  
+  "rightpos": {
+    "start": [52, 43],
+    "end": [90, 43]
+  },
+  
+  "leftpos": {
+    "start": [48, 43],
+    "end": [10, 43]
+  },
+
+  "nosepos": {
+    "start": [50, 30],
+    "end": [50, 37]
+  },
+
+  "fusepos": {
+    "start": [50, 40],
+    "end": [50, 67]
+  },
+
+  "tailpos": {
+    "start": [50, 69],
+    "end": [50, 75]
+  },
+
+  "image": "./images/Radian.jpg"
+}
