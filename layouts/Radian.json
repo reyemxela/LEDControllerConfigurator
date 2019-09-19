@@ -1,18 +1,37 @@
 {
-  "rightcount": 31,
-  "leftcount": 31,
-  "nosecount": 4,
-  "fusecount": 18,
-  "tailcount": 8,
-
-  "rightpos": {
-    "start": [48, 43],
-    "end": [10, 43]
+  "right": {
+    "count": 31,
+    "reversed": false
   },
 
-  "leftpos": {
+  "left": {
+    "count": 31,
+    "reversed": false
+  },
+
+  "nose": {
+    "count": 4,
+    "reversed": false
+  },
+
+  "fuse": {
+    "count": 18,
+    "reversed": false
+  },
+
+  "tail": {
+    "count": 8,
+    "reversed": false
+  },
+  
+  "rightpos": {
     "start": [52, 43],
     "end": [90, 43]
+  },
+  
+  "leftpos": {
+    "start": [48, 43],
+    "end": [10, 43]
   },
 
   "nosepos": {
