@@ -23,6 +23,8 @@
     "count": 8,
     "reversed": false
   },
+
+  "nosefuseJoined": true,
   
   "rightpos": {
     "start": [52, 43],
