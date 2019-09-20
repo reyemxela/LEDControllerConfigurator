@@ -90,7 +90,7 @@ function draw() {
   text('nose (' + curLayout.Nose.count + ')', noseSlider.x + noseSlider.width, noseSlider.y+7);
   text('fuse (' + curLayout.Fuse.count + ')', fuseSlider.x + fuseSlider.width, fuseSlider.y+7);
   text('tail (' + curLayout.Tail.count + ')', tailSlider.x + tailSlider.width, tailSlider.y+7);
-  
+
   text('Navlights (' + curLayout.wingNavLEDs + ')', wingNavSlider.x + wingNavSlider.width, wingNavSlider.y+7);
   text('show?', wingNavCheck.x + 15, wingNavCheck.y+6);
 
@@ -223,13 +223,44 @@ function drawStrip(strip) {
   pop();
 }
 
+let navCounter = 0;
+let navStep = 0;
 function navlights() {
+  navCounter += deltaTime;
+  if (navCounter > 60) {
+    navCounter = 0;
+    navStep += 1;
+  }
+
+  push();
+  colorMode(RGB, 255);
+
+  switch (navStep) {
+    case 25:
+      // strobe 1
+      setNavLights(color(255, 255, 255), color(255, 255, 255));
+      break;
+    case 27:
+      // strobe 2
+      setNavLights(color(255, 255, 255), color(255, 255, 255));
+      break;
+    case 28:
+      // red/green, loop around
+      setNavLights(color(255, 0, 0), color(0, 255, 0));
+      navStep = 0;
+      break;
+    default:
+      // red/green
+      setNavLights(color(255, 0, 0), color(0, 255, 0));
+      break;
+  }
+  pop();
+}
+
+function setNavLights(lcolor, rcolor) {
   for (i = curLayout.wingNavPoint; i < curLayout.Right.count; i++) {
-    push();
-    colorMode(RGB, 255);
-    curLayout.Right.leds[i] = color(0, 255, 0);
-    curLayout.Left.leds[i] = color(255, 0, 0);
-    pop();
+    curLayout.Left.leds[i] = lcolor;
+    curLayout.Right.leds[i] = rcolor;
   }
 }
 
@@ -254,4 +285,22 @@ function rainbow() {
   for (i = 0; i < curLayout.Tail.count; i++) {
     curLayout.Tail.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
   }
+}
+
+function generateConfig() {
+return `// number of LEDs in specific strings
+#define WING_LEDS ${curLayout.Right.count} // total wing LEDs
+#define NOSE_LEDS ${curLayout.Nose.count} // total nose LEDs
+#define FUSE_LEDS ${curLayout.Fuse.count} // total fuselage LEDs
+#define TAIL_LEDS ${curLayout.Tail.count} // total tail LEDs
+
+// strings reversed?
+#define WING_REV ${curLayout.Right.reversed}
+#define NOSE_REV ${curLayout.Nose.reversed}
+#define FUSE_REV ${curLayout.Fuse.reversed}
+#define TAIL_REV ${curLayout.Tail.reversed}
+
+#define NOSE_FUSE_JOINED ${curLayout.nosefuseJoined} // are the nose and fuse strings joined?
+#define WING_NAV_LEDS ${curLayout.wingNavLEDs} // wing LEDs that are navlights
+`
 }
