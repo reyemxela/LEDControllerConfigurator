@@ -1,55 +1,17 @@
 {
-  "right": {
-    "count": 19,
-    "reversed": false
-  },
-
-  "left": {
-    "count": 19,
-    "reversed": false
-  },
-
-  "nose": {
-    "count": 5,
-    "reversed": true
-  },
-
-  "fuse": {
-    "count": 16,
-    "reversed": false
-  },
-
-  "tail": {
-    "count": 6,
-    "reversed": false
-  },
+  "wing": { "count": 19, "reversed": false },
+  "nose": { "count": 5, "reversed": true },
+  "fuse": { "count": 16, "reversed": false },
+  "tail": { "count": 6, "reversed": false },
 
   "nosefuseJoined": false,
+  "wingNavLEDs": 8,
   
-  "rightpos": {
-    "start": [52, 25],
-    "end": [94, 25]
-  },
-  
-  "leftpos": {
-    "start": [48, 25],
-    "end": [6, 25]
-  },
-
-  "nosepos": {
-    "start": [50, 10],
-    "end": [50, 17]
-  },
-
-  "fusepos": {
-    "start": [50, 20],
-    "end": [50, 48]
-  },
-
-  "tailpos": {
-    "start": [50, 50],
-    "end": [50, 58]
-  },
+  "rightpos": { "start": [52, 25], "end": [94, 25] },
+  "leftpos":  { "start": [48, 25], "end": [6, 25] },
+  "nosepos":  { "start": [50, 10], "end": [50, 17] },
+  "fusepos":  { "start": [50, 20], "end": [50, 48] },
+  "tailpos":  { "start": [50, 50], "end": [50, 58] },
 
   "image": "./images/Cub.jpg"
 }
