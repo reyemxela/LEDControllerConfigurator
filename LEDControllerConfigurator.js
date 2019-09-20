@@ -6,8 +6,8 @@ let curLayout;
 let font;
 let scaleW;
 let scaleH;
-let rightSlider, leftSlider, noseSlider, fuseSlider, tailSlider;
-let rightCheck, leftCheck, noseCheck, fuseCheck, tailCheck, nosefuseJoinCheck;
+let wingSlider, wingNavSlider, noseSlider, fuseSlider, tailSlider;
+let wingCheck, wingNavCheck, noseCheck, fuseCheck, tailCheck, nosefuseJoinCheck;
 let layoutSelect;
 
 function preload() {
@@ -29,7 +29,7 @@ function setup() {
   curLayout = new Layout(layouts["Radian"]);
 
   let sliderX = 20;
-  let sliderY = 450;
+  let sliderY = 480;
 
   layoutSelect = createSelect();
   layoutSelect.position(sliderX, sliderY-40);
@@ -41,27 +41,27 @@ function setup() {
   nosefuseJoinCheck = createCheckbox('', curLayout.nosefuseJoined);
   nosefuseJoinCheck.position(sliderX+280, sliderY+75);
 
-  rightCheck = createCheckbox('', curLayout.Right.reversed);
-  rightCheck.position(sliderX+220, sliderY);
-  leftCheck = createCheckbox('', curLayout.Left.reversed);
-  leftCheck.position(sliderX+220, sliderY+30);
+  wingCheck = createCheckbox('', curLayout.Right.reversed);
+  wingCheck.position(sliderX+200, sliderY);
+  wingNavCheck = createCheckbox('', true);
+  wingNavCheck.position(sliderX+500, sliderY);
   noseCheck = createCheckbox('', curLayout.Nose.reversed);
-  noseCheck.position(sliderX+220, sliderY+60);
+  noseCheck.position(sliderX+200, sliderY+30);
   fuseCheck = createCheckbox('', curLayout.Fuse.reversed);
-  fuseCheck.position(sliderX+220, sliderY+90);
+  fuseCheck.position(sliderX+200, sliderY+60);
   tailCheck = createCheckbox('', curLayout.Tail.reversed);
-  tailCheck.position(sliderX+220, sliderY+120);
+  tailCheck.position(sliderX+200, sliderY+90);
 
-  rightSlider = createSlider(0, 100, curLayout.Right.count);
-  rightSlider.position(sliderX, sliderY);
-  leftSlider = createSlider(0, 100, curLayout.Left.count);
-  leftSlider.position(sliderX, sliderY+30);
+  wingSlider = createSlider(0, 100, curLayout.Right.count);
+  wingSlider.position(sliderX, sliderY);
+  wingNavSlider = createSlider(0, 100, curLayout.wingNavLEDs);
+  wingNavSlider.position(sliderX+280, sliderY);
   noseSlider = createSlider(0, 100, curLayout.Nose.count);
-  noseSlider.position(sliderX, sliderY+60);
+  noseSlider.position(sliderX, sliderY+30);
   fuseSlider = createSlider(0, 100, curLayout.Fuse.count);
-  fuseSlider.position(sliderX, sliderY+90);
+  fuseSlider.position(sliderX, sliderY+60);
   tailSlider = createSlider(0, 100, curLayout.Tail.count);
-  tailSlider.position(sliderX, sliderY+120);
+  tailSlider.position(sliderX, sliderY+90);
   
   // noLoop();
 }
@@ -70,34 +70,42 @@ function draw() {
   background(50);
   image(curLayout.image, 0, 0, width, height);
   
-  curLayout.Right.count = rightSlider.value();
-  curLayout.Left.count = leftSlider.value();
+  curLayout.Right.count = wingSlider.value();
+  curLayout.Left.count = wingSlider.value();
   curLayout.Nose.count = noseSlider.value();
   curLayout.Fuse.count = fuseSlider.value();
   curLayout.Tail.count = tailSlider.value();
 
-  curLayout.Right.reversed = rightCheck.checked();
-  curLayout.Left.reversed = leftCheck.checked();
+  curLayout.Right.reversed = wingCheck.checked();
+  curLayout.Left.reversed = wingCheck.checked();
   curLayout.Nose.reversed = noseCheck.checked();
   curLayout.Fuse.reversed = fuseCheck.checked();
   curLayout.Tail.reversed = tailCheck.checked();
 
   curLayout.nosefuseJoined = nosefuseJoinCheck.checked();
+  curLayout.wingNavLEDs = wingNavSlider.value();
+  curLayout.wingNavPoint = curLayout.Right.count - (wingNavCheck.checked() ? curLayout.wingNavLEDs : 0);
 
-  text('right (' + curLayout.Right.count + ')', rightSlider.x * 2 + rightSlider.width, rightSlider.y+7);
-  text('left (' + curLayout.Left.count + ')', leftSlider.x * 2 + leftSlider.width, leftSlider.y+7);
-  text('nose (' + curLayout.Nose.count + ')', noseSlider.x * 2 + noseSlider.width, noseSlider.y+7);
-  text('fuse (' + curLayout.Fuse.count + ')', fuseSlider.x * 2 + fuseSlider.width, fuseSlider.y+7);
-  text('tail (' + curLayout.Tail.count + ')', tailSlider.x * 2 + tailSlider.width, tailSlider.y+7);
+  text('wing (' + curLayout.Right.count + ')', wingSlider.x + wingSlider.width, wingSlider.y+7);
+  text('nose (' + curLayout.Nose.count + ')', noseSlider.x + noseSlider.width, noseSlider.y+7);
+  text('fuse (' + curLayout.Fuse.count + ')', fuseSlider.x + fuseSlider.width, fuseSlider.y+7);
+  text('tail (' + curLayout.Tail.count + ')', tailSlider.x + tailSlider.width, tailSlider.y+7);
+  
+  text('Navlights (' + curLayout.wingNavLEDs + ')', wingNavSlider.x + wingNavSlider.width, wingNavSlider.y+7);
+  text('show?', wingNavCheck.x + 15, wingNavCheck.y+6);
 
-  text('rev?', rightCheck.x + 15, rightCheck.y+6);
-  text('rev?', leftCheck.x + 15, leftCheck.y+6);
+  text('rev?', wingCheck.x + 15, wingCheck.y+6);
   text('rev?', noseCheck.x + 15, noseCheck.y+6);
   text('rev?', fuseCheck.x + 15, fuseCheck.y+6);
   text('rev?', tailCheck.x + 15, tailCheck.y+6);
   text('Nose/Fuse joined?', nosefuseJoinCheck.x + 15, nosefuseJoinCheck.y+6);
   
   rainbow();
+
+  if (wingNavCheck.checked()) {
+    navlights();
+  }
+
   drawStrip(curLayout.Right);
   drawStrip(curLayout.Left);
   drawStrip(curLayout.Nose);
@@ -110,7 +118,7 @@ function draw() {
 class Strip {
   constructor(label, info, position) {
     this.leds = [];
-    this.label = '>  ' + label + '  >';
+    this.label = label; // '>  ' + label + '  >';
     this.count = info.count;
     this.reversed = info.reversed;
     this.startpos = createVector(position.start[0], position.start[1]);
@@ -121,12 +129,14 @@ class Strip {
 
 class Layout {
   constructor(data) {
-    this.Right = new Strip('Right', data.right, data.rightpos);
-    this.Left = new Strip('Left', data.left, data.leftpos);
+    this.Right = new Strip('Right', data.wing, data.rightpos);
+    this.Left = new Strip('Left', data.wing, data.leftpos);
     this.Nose = new Strip('Nose', data.nose, data.nosepos);
     this.Fuse = new Strip('Fuse', data.fuse, data.fusepos);
     this.Tail = new Strip('Tail', data.tail, data.tailpos);
     this.nosefuseJoined = data.nosefuseJoined;
+    this.wingNavLEDs = data.wingNavLEDs;
+    this.wingNavPoint = data.wing.count - this.wingNavLEDs;
     this.image = loadImage(String(data.image));
   }
 }
@@ -137,14 +147,14 @@ function changeLayout() {
 }
 
 function loadValues() {
-  rightSlider.value(curLayout.Right.count);
-  leftSlider.value(curLayout.Left.count);
+  wingSlider.value(curLayout.Right.count);
   noseSlider.value(curLayout.Nose.count);
   fuseSlider.value(curLayout.Fuse.count);
   tailSlider.value(curLayout.Tail.count);
 
-  rightCheck.checked(curLayout.Right.reversed);
-  leftCheck.checked(curLayout.Left.reversed);
+  wingNavSlider.value(curLayout.wingNavLEDs);
+
+  wingCheck.checked(curLayout.Right.reversed);
   noseCheck.checked(curLayout.Nose.reversed);
   fuseCheck.checked(curLayout.Fuse.reversed);
   tailCheck.checked(curLayout.Tail.reversed);
@@ -160,27 +170,37 @@ function setNoseFuse(led, color) {
   }
 }
 
+function setBothWings(led, color) {
+  if (led < curLayout.wingNavLEDs) {
+    curLayout.Left.leds[curLayout.wingNavPoint - led - 1] = color;
+  } else {
+    curLayout.Fuse.leds[led - curLayout.wingNavPoint] = color;
+  }
+}
 
 function drawStrip(strip) {
   if (strip.count < 1) { return; }
 
   push();
 
+  let startpos = createVector(strip.startpos.x * scaleW, strip.startpos.y * scaleH);
+  let endpos = createVector(strip.endpos.x * scaleW, strip.endpos.y * scaleH);
+
+  let label;
+  if (strip.reversed) { label = '<<< ' + strip.label + ' <<<'; }
+  else {                label = '>>> ' + strip.label + ' >>>'; }
+
   for (i = 0; i < strip.count; i++) {
-    let diff = p5.Vector.sub(strip.endpos, strip.startpos).div(((strip.count > 1) ? (strip.count-1) : (1))).mult(i);
-    let pos = p5.Vector.add(strip.startpos, diff);
-    pos.x *= scaleW;
-    pos.y *= scaleH;
+    let diff = p5.Vector.sub(endpos, startpos).div(((strip.count > 1) ? (strip.count-1) : (1))).mult(i);
+    let pos = p5.Vector.add(startpos, diff);
     fill(strip.leds[i]);
     ellipse(pos.x, pos.y, ledsize, ledsize);
   }
 
   fill(0);
-  let midpos = p5.Vector.sub(strip.endpos, strip.startpos).div(2).add(strip.startpos);
-  let rot = p5.Vector.sub(strip.endpos, strip.startpos).heading();
-  if (strip.reversed) { rot += PI};
-  midpos.x *= scaleW;
-  midpos.y *= scaleH;
+  let midpos = p5.Vector.sub(endpos, startpos).div(2).add(startpos);
+  let rot = p5.Vector.sub(endpos, startpos).heading();
+  if (rot > HALF_PI) { rot -= PI; } // keep text "upright"
 
   translate(midpos.x, midpos.y);
   rotate(rot);
@@ -192,23 +212,31 @@ function drawStrip(strip) {
   // text bounding box background
   strokeWeight(0);
   fill(255);
-  let bbox = font.textBounds(strip.label, 0, -5, textSize());
+  let bbox = font.textBounds(label, 0, -5, textSize());
   rect(bbox.x, bbox.y, bbox.w, bbox.h);
 
   // text
   strokeWeight(2);
   fill(0);
-  text(strip.label, 0, -5);
+  text(label, 0, -5); 
 
   pop();
 }
 
+function navlights() {
+  for (i = curLayout.wingNavPoint; i < curLayout.Right.count; i++) {
+    push();
+    colorMode(RGB, 255);
+    curLayout.Right.leds[i] = color(0, 255, 0);
+    curLayout.Left.leds[i] = color(255, 0, 0);
+    pop();
+  }
+}
+
 function rainbow() {
   colorMode(HSB, 255);
-  for (i = 0; i < curLayout.Right.count; i++) {
+  for (i = 0; i < curLayout.wingNavPoint; i++) {
     curLayout.Right.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
-  }
-  for (i = 0; i < curLayout.Left.count; i++) {
     curLayout.Left.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
   }
   if (curLayout.nosefuseJoined) {
