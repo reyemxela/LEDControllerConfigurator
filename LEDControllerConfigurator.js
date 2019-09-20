@@ -86,6 +86,8 @@ function draw() {
   curLayout.wingNavLEDs = wingNavSlider.value();
   curLayout.wingNavPoint = curLayout.Right.count - (wingNavCheck.checked() ? curLayout.wingNavLEDs : 0);
 
+  wingNavSlider.elt.max = wingSlider.value();
+
   text('wing (' + curLayout.Right.count + ')', wingSlider.x + wingSlider.width, wingSlider.y+7);
   text('nose (' + curLayout.Nose.count + ')', noseSlider.x + noseSlider.width, noseSlider.y+7);
   text('fuse (' + curLayout.Fuse.count + ')', fuseSlider.x + fuseSlider.width, fuseSlider.y+7);
