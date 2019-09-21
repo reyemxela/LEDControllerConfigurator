@@ -3,6 +3,8 @@ let ledsize = 8;
 let layouts;
 let curLayout;
 
+let currentPoints;
+
 let font;
 let scaleW;
 let scaleH;
@@ -10,6 +12,9 @@ let wingSlider, wingNavSlider, noseSlider, fuseSlider, tailSlider;
 let wingCheck, wingNavCheck, noseCheck, fuseCheck, tailCheck, nosefuseJoinCheck;
 let layoutSelect;
 let showSelect;
+
+let exportTextArea;
+let exportButton;
 
 function preload() {
   layouts = {
@@ -21,11 +26,11 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(700, 700);
+  createCanvas(700, 600);
   stroke(255);
 
   scaleW = width/100;
-  scaleH = height/100;
+  scaleH = width/100;
 
   curLayout = new Layout(layouts["Radian"]);
 
@@ -69,12 +74,22 @@ function setup() {
   tailSlider = createSlider(0, 100, curLayout.Tail.count);
   tailSlider.position(sliderX, sliderY+90);
   
+  exportButton = createButton('Generate config');
+  exportButton.mousePressed(generateConfig);
+  exportButton.style('display', 'block');
+  
+  exportTextArea = createElement('textArea');
+  exportTextArea.elt.cols = 80;
+  exportTextArea.elt.rows = 16;
+  exportTextArea.elt.readOnly = true;
+  exportTextArea.style('display', 'block');
+
   // noLoop();
 }
 
 function draw() {
   background(50);
-  image(curLayout.image, 0, 0, width, height);
+  image(curLayout.image, 0, 0, width, width);
   
   curLayout.Right.count = wingSlider.value();
   curLayout.Left.count = wingSlider.value();
@@ -115,13 +130,13 @@ function draw() {
     case 'Rainbow':
       rainbow();
       break;
-    case 'Cylon':
-      cylon();
-      break;
+      case 'Cylon':
+        cylon();
+        break;
   }
   // rainbow();
   // cylon();
-
+  
   if (wingNavCheck.checked()) {
     navlights();
   }
@@ -131,8 +146,9 @@ function draw() {
   drawStrip(curLayout.Nose);
   drawStrip(curLayout.Fuse);
   drawStrip(curLayout.Tail);
-}
 
+  mouseHilight();
+}
 
 
 class Strip {
@@ -141,8 +157,8 @@ class Strip {
     this.label = label; // '>  ' + label + '  >';
     this.count = info.count;
     this.reversed = info.reversed;
-    this.startpos = createVector(position.start[0], position.start[1]);
-    this.endpos = createVector(position.end[0], position.end[1]);
+    this.startpos = {pos: createVector(position.start[0]*scaleW, position.start[1]*scaleH), dragging: false};
+    this.endpos = {pos: createVector(position.end[0]*scaleW, position.end[1]*scaleH), dragging: false};
     for (this.i = 0; this.i < this.count; this.i++) { this.leds[this.i] = color(0, 0, 0); }
   }
 }
@@ -159,6 +175,55 @@ class Layout {
     this.wingNavPoint = data.wing.count - this.wingNavLEDs;
     this.image = loadImage(String(data.image));
   }
+  getStripPoints() {
+    return [
+      this.Right.startpos, this.Right.endpos,
+      this.Left.startpos, this.Left.endpos,
+      this.Nose.startpos, this.Nose.endpos,
+      this.Fuse.startpos, this.Fuse.endpos,
+      this.Tail.startpos, this.Tail.endpos,
+    ];
+  }
+}
+
+function mousePressed() {
+  for (i of currentPoints) {
+    let distance = dist(mouseX, mouseY, i.pos.x, i.pos.y);
+    if (distance < ledsize) {
+      i.dragging = true;
+    } else {
+      i.dragging = false;
+    }
+  }
+}
+
+function mouseDragged() {
+  for (i of currentPoints) {
+    if (i.dragging) {
+      if ( mouseX > 0 && mouseX < width) {
+        i.pos.x = mouseX;
+      }
+      if ( mouseY > 0 && mouseY < height) {
+        i.pos.y = mouseY;
+      }
+    }
+  }
+}
+
+function mouseHilight() {
+  push();
+  currentPoints = curLayout.getStripPoints();
+  for (i of currentPoints) {
+    // console.log(i);
+    let distance = dist(mouseX, mouseY, i.pos.x, i.pos.y);
+    if (distance < ledsize) {
+      fill(0, 0, 0, 0);
+      stroke(0);
+      ellipse(i.pos.x, i.pos.y, 12, 12);
+    }
+  }
+  pop();
+  // noLoop();
 }
 
 function changeLayout() {
@@ -203,8 +268,8 @@ function drawStrip(strip) {
 
   push();
 
-  let startpos = createVector(strip.startpos.x * scaleW, strip.startpos.y * scaleH);
-  let endpos = createVector(strip.endpos.x * scaleW, strip.endpos.y * scaleH);
+  let startpos = strip.startpos.pos;
+  let endpos = strip.endpos.pos;
 
   let label;
   if (strip.reversed) { label = '<<< ' + strip.label + ' <<<'; }
@@ -345,7 +410,7 @@ function cylon() {
 }
 
 function generateConfig() {
-return `// number of LEDs in specific strings
+exportTextArea.html(`// number of LEDs in specific strings
 #define WING_LEDS ${curLayout.Right.count} // total wing LEDs
 #define NOSE_LEDS ${curLayout.Nose.count} // total nose LEDs
 #define FUSE_LEDS ${curLayout.Fuse.count} // total fuselage LEDs
@@ -359,5 +424,5 @@ return `// number of LEDs in specific strings
 
 #define NOSE_FUSE_JOINED ${curLayout.nosefuseJoined} // are the nose and fuse strings joined?
 #define WING_NAV_LEDS ${curLayout.wingNavLEDs} // wing LEDs that are navlights
-`
+`);
 }
