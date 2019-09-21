@@ -9,6 +9,7 @@ let scaleH;
 let wingSlider, wingNavSlider, noseSlider, fuseSlider, tailSlider;
 let wingCheck, wingNavCheck, noseCheck, fuseCheck, tailCheck, nosefuseJoinCheck;
 let layoutSelect;
+let showSelect;
 
 function preload() {
   layouts = {
@@ -37,6 +38,11 @@ function setup() {
   layoutSelect.option('Wing');
   layoutSelect.option('Generic');
   layoutSelect.changed(changeLayout);
+
+  showSelect = createSelect();
+  showSelect.position(layoutSelect.x + 170, layoutSelect.y);
+  showSelect.option('Rainbow');
+  showSelect.option('Cylon');
   
   nosefuseJoinCheck = createCheckbox('', curLayout.nosefuseJoined);
   nosefuseJoinCheck.position(sliderX+280, sliderY+75);
@@ -88,6 +94,9 @@ function draw() {
 
   wingNavSlider.elt.max = wingSlider.value();
 
+  text('Model', layoutSelect.x + 70, layoutSelect.y+7);
+  text('Show', showSelect.x + 75, showSelect.y+7);
+
   text('wing (' + curLayout.Right.count + ')', wingSlider.x + wingSlider.width, wingSlider.y+7);
   text('nose (' + curLayout.Nose.count + ')', noseSlider.x + noseSlider.width, noseSlider.y+7);
   text('fuse (' + curLayout.Fuse.count + ')', fuseSlider.x + fuseSlider.width, fuseSlider.y+7);
@@ -102,7 +111,16 @@ function draw() {
   text('rev?', tailCheck.x + 15, tailCheck.y+6);
   text('Nose/Fuse joined?', nosefuseJoinCheck.x + 15, nosefuseJoinCheck.y+6);
   
-  rainbow();
+  switch(showSelect.value()) {
+    case 'Rainbow':
+      rainbow();
+      break;
+    case 'Cylon':
+      cylon();
+      break;
+  }
+  // rainbow();
+  // cylon();
 
   if (wingNavCheck.checked()) {
     navlights();
@@ -173,10 +191,10 @@ function setNoseFuse(led, color) {
 }
 
 function setBothWings(led, color) {
-  if (led < curLayout.wingNavLEDs) {
+  if (led < curLayout.wingNavPoint) {
     curLayout.Left.leds[curLayout.wingNavPoint - led - 1] = color;
   } else {
-    curLayout.Fuse.leds[led - curLayout.wingNavPoint] = color;
+    curLayout.Right.leds[led - curLayout.wingNavPoint] = color;
   }
 }
 
@@ -287,6 +305,43 @@ function rainbow() {
   for (i = 0; i < curLayout.Tail.count; i++) {
     curLayout.Tail.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
   }
+}
+
+function saw(speed) {
+  return abs(millis()*speed/50000 % 2.0 - 1.0);
+}
+
+function cylon() {
+  push();
+  colorMode(HSB);
+
+  // let saw = abs(millis()/1000 % 2.0 - 1.0);
+  // let saw = abs(millis()*0.0005 % 2.0 - 1.0);
+
+  for (i = 0; i < curLayout.wingNavPoint; i++) {
+    curLayout.Right.leds[i] = color(0, 255, curLayout.Right.leds[i]._getBrightness()*0.9);
+    curLayout.Left.leds[i] = color(0, 255, curLayout.Left.leds[i]._getBrightness()*0.9);
+  }
+  for (i = 0; i < curLayout.Nose.count; i++) {
+    curLayout.Nose.leds[i] = color(0, 255, curLayout.Nose.leds[i]._getBrightness()*0.9);
+  }
+  for (i = 0; i < curLayout.Fuse.count; i++) {
+    curLayout.Fuse.leds[i] = color(0, 255, curLayout.Fuse.leds[i]._getBrightness()*0.9);
+  }
+  for (i = 0; i < curLayout.Tail.count; i++) {
+    curLayout.Tail.leds[i] = color(0, 255, curLayout.Tail.leds[i]._getBrightness()*0.9);
+  }
+  //scale down
+
+  setBothWings(int(saw(30)*curLayout.wingNavPoint*2), color(0, 255, 255));
+  if (curLayout.nosefuseJoined) {
+    setNoseFuse(int(saw(30)*(curLayout.Nose.count+curLayout.Fuse.count)), color(0, 255, 255));
+  } else {
+    curLayout.Nose.leds[int(saw(50)*curLayout.Nose.count)] = color(0, 255, 255);
+    curLayout.Fuse.leds[int(saw(30)*curLayout.Fuse.count)] = color(0, 255, 255);
+  }
+  curLayout.Tail.leds[int(saw(50)*curLayout.Tail.count)] = color(0, 255, 255);
+  pop();
 }
 
 function generateConfig() {
