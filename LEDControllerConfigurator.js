@@ -223,10 +223,18 @@ function mouseDragged() {
   for (i of currentPoints) {
     if (i.dragging) {
       if ( mouseX > 0 && mouseX < width) {
-        i.pos.x = mouseX;
+        if (keyIsDown(CONTROL)) {
+          i.pos.x = Math.round(mouseX/scaleW)*scaleW;
+        } else {
+          i.pos.x = mouseX;
+        }
       }
       if ( mouseY > 0 && mouseY < height) {
-        i.pos.y = mouseY;
+        if (keyIsDown(CONTROL)) {
+          i.pos.y = Math.round(mouseY/scaleH)*scaleH;
+        } else {
+          i.pos.y = mouseY;
+        }
       }
     }
   }
