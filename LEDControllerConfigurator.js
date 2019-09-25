@@ -1,4 +1,4 @@
-let ledsize = 8;
+let ledsize = 10;
 
 let layouts;
 let curLayout;
@@ -14,6 +14,7 @@ let layoutSelect;
 let showSelect;
 
 let exportTextArea;
+let exportLayoutTextArea;
 let exportButton;
 
 function preload() {
@@ -78,11 +79,22 @@ function setup() {
   exportButton.mousePressed(generateConfig);
   exportButton.style('display', 'block');
   
+  let div1 = createDiv('config.h <br />');
+  let div2 = createDiv('Layout JSON <br />');
+  div1.style('display', 'table-cell');
+  div2.style('display', 'table-cell');
+
   exportTextArea = createElement('textArea');
   exportTextArea.elt.cols = 80;
-  exportTextArea.elt.rows = 16;
+  exportTextArea.elt.rows = 18;
   exportTextArea.elt.readOnly = true;
-  exportTextArea.style('display', 'block');
+  exportTextArea.parent(div1);
+  
+  exportLayoutTextArea = createElement('textArea');
+  exportLayoutTextArea.elt.cols = 65;
+  exportLayoutTextArea.elt.rows = 18;
+  exportLayoutTextArea.elt.readOnly = true;
+  exportLayoutTextArea.parent(div2);
 
   // noLoop();
 }
@@ -147,7 +159,7 @@ function draw() {
   drawStrip(curLayout.Fuse);
   drawStrip(curLayout.Tail);
 
-  mouseHilight();
+  mouseHighlight();
 }
 
 
@@ -161,6 +173,15 @@ class Strip {
     this.endpos = {pos: createVector(position.end[0]*scaleW, position.end[1]*scaleH), dragging: false};
     for (this.i = 0; this.i < this.count; this.i++) { this.leds[this.i] = color(0, 0, 0); }
   }
+  set(led, color) {
+    if (led < this.count) {
+      if (this.reversed) {
+        this.leds[this.count - led - 1] = color;
+      } else {
+        this.leds[led] = color;
+      }
+    }
+  }
 }
 
 class Layout {
@@ -173,6 +194,7 @@ class Layout {
     this.nosefuseJoined = data.nosefuseJoined;
     this.wingNavLEDs = data.wingNavLEDs;
     this.wingNavPoint = data.wing.count - this.wingNavLEDs;
+    this.imagePath = String(data.image);
     this.image = loadImage(String(data.image));
   }
   getStripPoints() {
@@ -210,7 +232,7 @@ function mouseDragged() {
   }
 }
 
-function mouseHilight() {
+function mouseHighlight() {
   push();
   currentPoints = curLayout.getStripPoints();
   for (i of currentPoints) {
@@ -249,17 +271,17 @@ function loadValues() {
 
 function setNoseFuse(led, color) {
   if (led < curLayout.Nose.count) {
-    curLayout.Nose.leds[led] = color;
+    curLayout.Nose.set(led, color);
   } else {
-    curLayout.Fuse.leds[led - curLayout.Nose.count] = color;
+    curLayout.Fuse.set(led - curLayout.Nose.count, color);
   }
 }
 
 function setBothWings(led, color) {
   if (led < curLayout.wingNavPoint) {
-    curLayout.Left.leds[curLayout.wingNavPoint - led - 1] = color;
+    curLayout.Left.set(curLayout.wingNavPoint - led - 1, color);
   } else {
-    curLayout.Right.leds[led - curLayout.wingNavPoint] = color;
+    curLayout.Right.set(led - curLayout.wingNavPoint, color);
   }
 }
 
@@ -268,12 +290,14 @@ function drawStrip(strip) {
 
   push();
 
+  strokeWeight(0);
+
   let startpos = strip.startpos.pos;
   let endpos = strip.endpos.pos;
 
-  let label;
-  if (strip.reversed) { label = '<<< ' + strip.label + ' <<<'; }
-  else {                label = '>>> ' + strip.label + ' >>>'; }
+  let label = strip.label;
+  // if (strip.reversed) { label = '<<< ' + strip.label + ' <<<'; }
+  // else {                label = '>>> ' + strip.label + ' >>>'; }
 
   for (i = 0; i < strip.count; i++) {
     let diff = p5.Vector.sub(endpos, startpos).div(((strip.count > 1) ? (strip.count-1) : (1))).mult(i);
@@ -285,25 +309,37 @@ function drawStrip(strip) {
   fill(0);
   let midpos = p5.Vector.sub(endpos, startpos).div(2).add(startpos);
   let rot = p5.Vector.sub(endpos, startpos).heading();
-  if (rot > HALF_PI) { rot -= PI; } // keep text "upright"
 
+  strokeWeight(2);
+  textAlign(CENTER);
+  textSize(10);
+  textFont(font);
+  
+  translate(startpos.x, startpos.y);
+  rotate(rot-HALF_PI);
+  text('-Start', 18, 5);
+  resetMatrix();
+  translate(endpos.x, endpos.y);
+  rotate(rot-HALF_PI);
+  text('-End', 18, 5);
+  
+  if (rot > HALF_PI) { rot -= PI; } // keep text "upright"
+  resetMatrix();
   translate(midpos.x, midpos.y);
   rotate(rot);
-
-  textAlign(CENTER);
+  
   textSize(14);
-  textFont(font);
-
   // text bounding box background
   strokeWeight(0);
   fill(255);
-  let bbox = font.textBounds(label, 0, -5, textSize());
-  rect(bbox.x, bbox.y, bbox.w, bbox.h);
+  let bbox = font.textBounds(label, 0, -10, textSize());
+  rect(bbox.x-5, bbox.y-2, bbox.w+10, bbox.h+4);
 
   // text
   strokeWeight(2);
   fill(0);
-  text(label, 0, -5); 
+  text(label, 0, -10);
+
 
   pop();
 }
@@ -344,16 +380,16 @@ function navlights() {
 
 function setNavLights(lcolor, rcolor) {
   for (i = curLayout.wingNavPoint; i < curLayout.Right.count; i++) {
-    curLayout.Left.leds[i] = lcolor;
-    curLayout.Right.leds[i] = rcolor;
+    curLayout.Left.set(i, lcolor);
+    curLayout.Right.set(i, rcolor);
   }
 }
 
 function rainbow() {
   colorMode(HSB, 255);
   for (i = 0; i < curLayout.wingNavPoint; i++) {
-    curLayout.Right.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
-    curLayout.Left.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
+    curLayout.Right.set(i, color((frameCount + (i * 10))%255, 255, 255));
+    curLayout.Left.set(i, color((frameCount + (i * 10))%255, 255, 255));
   }
   if (curLayout.nosefuseJoined) {
     for (i = 0; i < (curLayout.Nose.count + curLayout.Fuse.count); i++) {
@@ -361,14 +397,14 @@ function rainbow() {
     }
   } else {
     for (i = 0; i < curLayout.Nose.count; i++) {
-      curLayout.Nose.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
+      curLayout.Nose.set(i, color((frameCount + (i * 10))%255, 255, 255));
     }
     for (i = 0; i < curLayout.Fuse.count; i++) {
-      curLayout.Fuse.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
+      curLayout.Fuse.set(i, color((frameCount + (i * 10))%255, 255, 255));
     }
   }
   for (i = 0; i < curLayout.Tail.count; i++) {
-    curLayout.Tail.leds[i] = color((frameCount + (i * 10))%255, 255, 255);
+    curLayout.Tail.set(i, color((frameCount + (i * 10))%255, 255, 255));
   }
 }
 
@@ -383,29 +419,38 @@ function cylon() {
   // let saw = abs(millis()/1000 % 2.0 - 1.0);
   // let saw = abs(millis()*0.0005 % 2.0 - 1.0);
 
+  let x;
   for (i = 0; i < curLayout.wingNavPoint; i++) {
-    curLayout.Right.leds[i] = color(0, 255, curLayout.Right.leds[i]._getBrightness()*0.9);
-    curLayout.Left.leds[i] = color(0, 255, curLayout.Left.leds[i]._getBrightness()*0.9);
+    x = i;
+    if (curLayout.Right.reversed) { x = curLayout.Right.count - i - 1; }
+    curLayout.Right.set(i, color(0, 255, curLayout.Right.leds[x]._getBrightness()*0.9));
+    curLayout.Left.set(i, color(0, 255, curLayout.Left.leds[x]._getBrightness()*0.9));
   }
   for (i = 0; i < curLayout.Nose.count; i++) {
-    curLayout.Nose.leds[i] = color(0, 255, curLayout.Nose.leds[i]._getBrightness()*0.9);
+    x = i;
+    if (curLayout.Nose.reversed) { x = curLayout.Nose.count - i - 1; }
+    curLayout.Nose.set(i, color(0, 255, curLayout.Nose.leds[x]._getBrightness()*0.9));
   }
   for (i = 0; i < curLayout.Fuse.count; i++) {
-    curLayout.Fuse.leds[i] = color(0, 255, curLayout.Fuse.leds[i]._getBrightness()*0.9);
+    x = i;
+    if (curLayout.Fuse.reversed) { x = curLayout.Fuse.count - i - 1; }
+    curLayout.Fuse.set(i, color(0, 255, curLayout.Fuse.leds[x]._getBrightness()*0.9));
   }
   for (i = 0; i < curLayout.Tail.count; i++) {
-    curLayout.Tail.leds[i] = color(0, 255, curLayout.Tail.leds[i]._getBrightness()*0.9);
+    x = i;
+    if (curLayout.Tail.reversed) { x = curLayout.Tail.count - i - 1; }
+    curLayout.Tail.set(i, color(0, 255, curLayout.Tail.leds[x]._getBrightness()*0.9));
   }
   //scale down
 
-  setBothWings(int(saw(30)*curLayout.wingNavPoint*2), color(0, 255, 255));
+  setBothWings(int(saw(30)*(curLayout.wingNavPoint*2)), color(0, 255, 255));
   if (curLayout.nosefuseJoined) {
     setNoseFuse(int(saw(30)*(curLayout.Nose.count+curLayout.Fuse.count)), color(0, 255, 255));
   } else {
-    curLayout.Nose.leds[int(saw(50)*curLayout.Nose.count)] = color(0, 255, 255);
-    curLayout.Fuse.leds[int(saw(30)*curLayout.Fuse.count)] = color(0, 255, 255);
+    curLayout.Nose.set(int(saw(50)*curLayout.Nose.count), color(0, 255, 255));
+    curLayout.Fuse.set(int(saw(30)*curLayout.Fuse.count), color(0, 255, 255));
   }
-  curLayout.Tail.leds[int(saw(50)*curLayout.Tail.count)] = color(0, 255, 255);
+  curLayout.Tail.set(int(saw(50)*curLayout.Tail.count), color(0, 255, 255));
   pop();
 }
 
@@ -424,5 +469,23 @@ exportTextArea.html(`// number of LEDs in specific strings
 
 #define NOSE_FUSE_JOINED ${curLayout.nosefuseJoined} // are the nose and fuse strings joined?
 #define WING_NAV_LEDS ${curLayout.wingNavLEDs} // wing LEDs that are navlights
+`);
+exportLayoutTextArea.html(`{
+  "wing": { "count": ${curLayout.Right.count}, "reversed": ${curLayout.Right.reversed} },
+  "nose": { "count": ${curLayout.Nose.count}, "reversed": ${curLayout.Nose.reversed} },
+  "fuse": { "count": ${curLayout.Fuse.count}, "reversed": ${curLayout.Fuse.reversed} },
+  "tail": { "count": ${curLayout.Tail.count}, "reversed": ${curLayout.Tail.reversed} },
+
+  "nosefuseJoined": ${curLayout.nosefuseJoined},
+  "wingNavLEDs": ${curLayout.wingNavLEDs},
+  
+  "rightpos": { "start": [${Math.round(curLayout.Right.startpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Right.startpos.pos.y/scaleH*10)/10}], "end": [${Math.round(curLayout.Right.endpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Right.endpos.pos.y/scaleH*10)/10}] },
+  "leftpos":  { "start": [${Math.round(curLayout.Left.startpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Left.startpos.pos.y/scaleH*10)/10}], "end": [${Math.round(curLayout.Left.endpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Left.endpos.pos.y/scaleH*10)/10}] },
+  "nosepos":  { "start": [${Math.round(curLayout.Nose.startpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Nose.startpos.pos.y/scaleH*10)/10}], "end": [${Math.round(curLayout.Nose.endpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Nose.endpos.pos.y/scaleH*10)/10}] },
+  "fusepos":  { "start": [${Math.round(curLayout.Fuse.startpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Fuse.startpos.pos.y/scaleH*10)/10}], "end": [${Math.round(curLayout.Fuse.endpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Fuse.endpos.pos.y/scaleH*10)/10}] },
+  "tailpos":  { "start": [${Math.round(curLayout.Tail.startpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Tail.startpos.pos.y/scaleH*10)/10}], "end": [${Math.round(curLayout.Tail.endpos.pos.x/scaleW*10)/10}, ${Math.round(curLayout.Tail.endpos.pos.y/scaleH*10)/10}] },
+
+  "image": "${curLayout.imagePath}"
+}
 `);
 }
