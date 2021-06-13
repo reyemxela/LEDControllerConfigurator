@@ -51,23 +51,23 @@ function setup() {
   showSelect.option('Cylon');
   
   nosefuseJoinCheck = createCheckbox('', curLayout.nosefuseJoined);
-  nosefuseJoinCheck.position(sliderX+280, sliderY+75);
+  nosefuseJoinCheck.position(sliderX+300, sliderY+75);
 
   wingCheck = createCheckbox('', curLayout.Right.reversed);
-  wingCheck.position(sliderX+200, sliderY);
+  wingCheck.position(sliderX+230, sliderY);
   wingNavCheck = createCheckbox('', true);
-  wingNavCheck.position(sliderX+500, sliderY);
+  wingNavCheck.position(sliderX+550, sliderY);
   noseCheck = createCheckbox('', curLayout.Nose.reversed);
-  noseCheck.position(sliderX+200, sliderY+30);
+  noseCheck.position(sliderX+230, sliderY+30);
   fuseCheck = createCheckbox('', curLayout.Fuse.reversed);
-  fuseCheck.position(sliderX+200, sliderY+60);
+  fuseCheck.position(sliderX+230, sliderY+60);
   tailCheck = createCheckbox('', curLayout.Tail.reversed);
-  tailCheck.position(sliderX+200, sliderY+90);
+  tailCheck.position(sliderX+230, sliderY+90);
 
   wingSlider = createSlider(0, 100, curLayout.Right.count);
   wingSlider.position(sliderX, sliderY);
   wingNavSlider = createSlider(0, 100, curLayout.wingNavLEDs);
-  wingNavSlider.position(sliderX+280, sliderY);
+  wingNavSlider.position(sliderX+300, sliderY);
   noseSlider = createSlider(0, 100, curLayout.Nose.count);
   noseSlider.position(sliderX, sliderY+30);
   fuseSlider = createSlider(0, 100, curLayout.Fuse.count);
