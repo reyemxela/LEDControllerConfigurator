@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LED Controller v2 Configurator</title>
+  <link href="configurator.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <div id="controls">
+    <label class="pre" for="wing">Wing LEDs:</label>
+    <input type="number" id="wing" min="0" max="255" value="31" />
+    <input type="checkbox" class="check" id="wingRev" />
+    <label class="post" for="wingRev">Reverse?</label>
+    <br>
+
+    <label class="pre" for="nose">Nose LEDs:</label>
+    <input type="number" id="nose" min="0" max="255" value="4" />
+    <input type="checkbox" class="check" id="noseRev" />
+    <label class="post" for="noseRev">Reverse?</label>
+    <br>
+
+    <label class="pre" for="fuse">Fuse LEDs:</label>
+    <input type="number" id="fuse" min="0" max="255" value="18" />
+    <input type="checkbox" class="check" id="fuseRev" />
+    <label class="post" for="fuseRev">Reverse?</label>
+    <br>
+
+    <label class="pre" for="tail">Tail LEDs:</label>
+    <input type="number" id="tail" min="0" max="255" value="8" />
+    <input type="checkbox" class="check" id="tailRev" />
+    <label class="post" for="tailRev">Reverse?</label>
+    <br>
+
+    <label class="pre" for="nav">Wing Nav LEDs:</label>
+    <input type="number" id="nav" min="0" max="31" value="8" />
+    <br>
+    <label class="pre" for="noseFuseJoined">Nose/Fuse joined?</label>
+    <input type="checkbox" class="check" id="noseFuseJoined" />
+    <br><br>
+    <button type="button" id="downloadFull">Firmware+config</button>
+    <button type="button" id="downloadConfig">Config only</button>
+  </div>
+
+  <script src="uf2.js"></script>
+  <script>
+    const wing = document.getElementById("wing");
+    const nose = document.getElementById("nose");
+    const fuse = document.getElementById("fuse");
+    const tail = document.getElementById("tail");
+    const nav = document.getElementById("nav");
+    const wingRev = document.getElementById("wingRev");
+    const noseRev = document.getElementById("noseRev");
+    const fuseRev = document.getElementById("fuseRev");
+    const tailRev = document.getElementById("tailRev");
+    const noseFuseJoined = document.getElementById("noseFuseJoined");
+
+    const downloadFull = document.getElementById("downloadFull");
+    const downloadConfig = document.getElementById("downloadConfig");
+
+    const download = (configOnly) => {
+      startDownload(
+        wing.valueAsNumber, nose.valueAsNumber, fuse.valueAsNumber,
+        tail.valueAsNumber, nav.valueAsNumber, wingRev.checked,
+        noseRev.checked, fuseRev.checked, tailRev.checked,
+        noseFuseJoined.checked, configOnly
+      );
+    };
+
+    wing.addEventListener("change", (event) => {
+      nav.max = wing.valueAsNumber;
+      if (nav.valueAsNumber > wing.valueAsNumber) {
+        nav.valueAsNumber = wing.valueAsNumber;
+      }
+    });
+
+    downloadFull.addEventListener("click", (event) => download(false));
+    downloadConfig.addEventListener("click", (event) => download(true));
+
+  </script>
+</body>
+</html>

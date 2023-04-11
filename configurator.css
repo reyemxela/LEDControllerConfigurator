@@ -1,0 +1,16 @@
+label {
+  display: inline-block;
+}
+
+label.pre {
+  width: 10em;
+}
+
+label.post {
+  width: 15em;
+}
+
+input[type="number"] {
+  width: 5em;
+  margin-right: 1em;
+}
