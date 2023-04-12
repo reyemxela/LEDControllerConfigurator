@@ -1,0 +1,35 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  font-size: 1.8em;
+}
+
+#controls {
+  width: fit-content;
+}
+
+.row {
+  padding: .5em;
+  margin: -1px;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.row:hover {
+  background-color: #afdfff;
+}
+
+label {
+  display: inline-block;
+}
+
+label.pre {
+  width: 10em;
+}
+
+input[type="number"] {
+  width: 5em;
+  margin-right: 1em;
+}
