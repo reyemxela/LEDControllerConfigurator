@@ -2,7 +2,7 @@ const LAYOUT_VER = [0xAA, 0x03];
 const FLASH_SIZE_MB = 2;
 const EEPROM_START = (0x10000000 + (FLASH_SIZE_MB*0x100000) - 4096);
 const LAYOUT_OFFSET = 256;
-const FIRMWARE_URL = "firmware.uf2";
+const FIRMWARE_URL = "firmware/firmware.uf2";
 const OFFSETS = {
   magic1:    0,
   magic2:    4,
@@ -106,6 +106,9 @@ async function startDownload(
 
   let firmware = [];
 
+  let link = document.createElement('a');
+  link.download = 'config.uf2';
+
   if (!configOnly) {
     let response = await fetch(FIRMWARE_URL);
     let data = new Uint8Array(await response.arrayBuffer());
@@ -122,14 +125,14 @@ async function startDownload(
     }
     layoutChunk.blockno = numBlocks - 1;
     layoutChunk.numblocks = numBlocks;
+
+    link.download = 'firmware-config.uf2';
   }
 
   firmware.push(...layoutChunk.getBlobData());
 
   let blob = new Blob(firmware, {type: 'application/octet-stream'});
   
-  let link = document.createElement('a');
-  link.download = 'test.bin';
   link.href = URL.createObjectURL(blob);
 
   link.click();

@@ -6,7 +6,7 @@
   <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-  <h1>Firmware version: <span id="version">v1.4.2</span></h1>
+  <h1>Firmware version: <span id="version"></span></h1>
   
   <div id="controls">
     <div class="row">
@@ -54,6 +54,11 @@
 
   <script src="uf2.js"></script>
   <script>
+    const version = document.getElementById("version");
+    fetch("firmware/version.txt")
+      .then(resp => resp.text())
+      .then(ver => version.innerHTML = ver);
+
     const wing = document.getElementById("wing");
     const nose = document.getElementById("nose");
     const fuse = document.getElementById("fuse");
